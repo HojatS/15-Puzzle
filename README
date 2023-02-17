@@ -1,0 +1,58 @@
+Overview:
+    The assignment, Assignment A, involves Search Algorithms,
+    in particular, Breadth-First, Depth-First, and A-Star.
+    It involves a program that simulates a puzzle called an N-Puzzle:
+    https://en.wikipedia.org/wiki/15_puzzle
+    In our version, the blank space is in the bottom right in the solution and we are working on 3x3 puzzles
+
+
+Files:
+    main.py
+        A driver used to run your code (All Algorithms) on all the examples.
+        I have given you 3 examples, and will graded your code against these 3,
+        as well as several others (of similar size)
+
+    search.py
+        A file with 4 algorithms that you will write as your assignment,
+        BFS, DFS, and 2 A-Stars. A shell has been included for each.
+        Be sure to return the correct expected values.
+
+Example:
+	Input File: 
+		0 2 3
+		1 5 6
+		4 7 8
+	Input to search function
+		puzzle = [[0, 2, 3], [1, 5, 6], [4, 7, 8]]
+	Expected Output
+		[UP, UP, LEFT, LEFT], using the ENUMS defined in search.py
+
+Software Requirements:
+    You must be using python3
+
+Running:
+    python3 main.py
+
+Assignment:
+    Implement
+        (20 pt) Breadth First Search,
+        (20 pt) Depth First Search,
+        (20 pt) A-Star with the heuristic: # of misplaced tiles
+        (20 pt) A-Star with the heuristic: Sum of Manhattan Distance of each tile from correct position.
+    Compare (20pt):
+        Which algorithm performed the fastest,
+        which took up the most memory and
+        which gave the best solution.
+        Include your answers in the README
+    Include a README with your code telling me how to run it,
+    any requirements or dependencies,
+    and the answers to the comparison questions above.
+
+    Submit ONE python file called 'search.py' and ONE README called README.txt
+
+Notes:
+    0 represents the empty space
+    Ties should be broken in the order: UP DOWN LEFT RIGHT
+    The goal state has the 0 in the bottom right
+    Be sure to submit clean, working code.
+    Code MUST be original. Copying code is considered academic dishonesty.
