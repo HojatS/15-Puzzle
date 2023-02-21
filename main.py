@@ -1,4 +1,4 @@
-from search import BFS, DFS, A_Star_H1, A_Star_H2, UP, DOWN, LEFT, RIGHT,
+from search import BFS, DFS, A_Star_H1, A_Star_H2, UP, DOWN, LEFT, RIGHT
 
 
 def get_move_string(moves):
@@ -48,11 +48,12 @@ def run_test(size, filename):
     moves = BFS(puzzle)
     print("  BFS | " + get_move_string(moves))
 
-    """
-
+    
+    
     puzzle = read_puzzle(filename)
     moves = DFS(puzzle)
     print("  DFS | " + get_move_string(moves))
+    
 
     puzzle = read_puzzle(filename)
     moves = A_Star_H1(puzzle)
@@ -62,7 +63,7 @@ def run_test(size, filename):
     moves = A_Star_H2(puzzle)
     print("  A* H2 | " + get_move_string(moves))
 
-    """
+    
 
     print("-" * 20)
 
