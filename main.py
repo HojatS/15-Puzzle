@@ -1,4 +1,4 @@
-from search import BFS, DFS, A_Star_H1, A_Star_H2, UP, DOWN, LEFT, RIGHT
+from search import BFS, DFS, A_Star_H1, A_Star_H2, UP, DOWN, LEFT, RIGHT,
 
 
 def get_move_string(moves):
