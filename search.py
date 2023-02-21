@@ -17,9 +17,11 @@ class Puzzle:
         self.parent = None
         self.enum = 0 
         self.gdistance = 0
-        self.hdistance = self.heuristic()
+        self.h1 = False
+        self.h2 = False
+        self.hdistance = 0
         
-        
+
     def child_states(self):
         
         #find neighbors of 0 and store in order: UP DOWN LEFT RIGHT
@@ -42,12 +44,16 @@ class Puzzle:
             child_state.enum = neighbor[2]
             child_state.parent = self
             child_state.gdistance = self.gdistance + 1
+            child_state.h1 = self.h1
+            child_state.h2 = self.h2
+            child_state.set_hdistance()
             if(self.parent == None):
                 puzzles.append(child_state)
             elif(child_state.puzzle != self.parent.puzzle):
                 puzzles.append(child_state)
                 
-        return puzzles     
+        return puzzles    
+     
 
     #find indeces of the location of 0
     def find_zero(self):
@@ -62,10 +68,16 @@ class Puzzle:
         i,j = self.find_zero()
         child[i][j], child[index1][index2] = child[index1][index2], child[i][j]
         return child
+    
+
+    def set_hdistance(self):
+        self.hdistance=self.heuristic()
 
     def TotalDistance(self):
         return self.gdistance + self.hdistance
     
+    
+    #comparison methods for heapq (with tie breaker)
     def __gt__(self, other):
         if (self.TotalDistance() == other.TotalDistance()):
             return self.enum > other.enum
@@ -78,10 +90,9 @@ class Puzzle:
         else:
             return self.TotalDistance() < other.TotalDistance()
 
+
     
-    #
-    # A-Star with the heuristic: # of misplaced tiles 
-    #  
+    # A-Star heuristics 
     def heuristic(self):
         distance = 0
         temp = copy.deepcopy(self.puzzle)
@@ -91,26 +102,15 @@ class Puzzle:
         enum = enumerate(arr)
         for index, tile in enum:
             if tile != goal_flat[index]:
-                distance = distance+1
+                if(self.h1):
+                    # A-Star with the heuristic: # of misplaced tiles
+                    distance = distance+1
+                elif(self.h2):
+                    # A-Star with the heuristic: Sum of Manhattan Distance of each tile from correct position
+                    distance = distance + Manhattan_distance(index,goal_flat.index(tile))
         return distance
 
-    """""
-    #
-    # A-Star with the heuristic: Sum of Manhattan Distance of each tile from correct position
-    #
-    def heuristic(self):
-        distance = 0
-        temp = copy.deepcopy(self.puzzle)
-        temp = np.array(temp)
-        temp = temp.flatten()
-        arr = list(temp)
-        enum = enumerate(arr)
-        for index, tile in enum:
-            if tile != goal_flat[index]:
-                distance = distance + Manhattan_distance(index,goal_flat.index(tile))
-        return distance
 
-    """""
 def Manhattan_distance(i, j):
     distance = 0
     X1= i // 3
@@ -183,7 +183,7 @@ def DFS(board):
 def A_Star_H1(board):
 
     puzzle=Puzzle(toInt(board))
-
+    puzzle.h1=True
     final_solution = []
     visited = []
     queue = []
@@ -192,7 +192,6 @@ def A_Star_H1(board):
     heapq.heappush(queue, puzzle)
     while queue:
         state = heapq.heappop(queue)
-        
         if state.puzzle == goal:
             visited.append(state)
             break 
@@ -211,7 +210,7 @@ def A_Star_H1(board):
 def A_Star_H2(board):
 
     puzzle=Puzzle(toInt(board))
-
+    puzzle.h2=True
     final_solution = []
     visited = []
     queue = []
@@ -220,7 +219,6 @@ def A_Star_H2(board):
     heapq.heappush(queue, puzzle)
     while queue:
         state = heapq.heappop(queue)
-        
         if state.puzzle == goal:
             visited.append(state)
             break 
@@ -237,21 +235,3 @@ def A_Star_H2(board):
 
 
 
-
-
-
-"""""
-print("BFS")
-print(BFS(puzzle))
-print(get_move_string(BFS(puzzle)))
-
-print("\nDFS")
-print(DFS(puzzle))
-print(get_move_string(DFS(puzzle)))
-print("\nA_Star_H1")
-print(A_Star_H1(puzzle))
-print(get_move_string(A_Star_H1(puzzle)))
-print("\nA_Star_H2")
-print(A_Star_H2(puzzle))
-print(get_move_string(A_Star_H2(puzzle)))
-"""""
