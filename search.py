@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import heapq
 
@@ -8,17 +9,18 @@ DOWN = 2
 RIGHT = 3
 
 goal = [[1,2,3],[4,5,6],[7,8,0]]
+goal_flat = [1,2,3,4,5,6,7,8,0]
     
 class Puzzle:
     def __init__(self, puzzle): 
         self.puzzle = puzzle
         self.parent = None
-        self.enum = None #ENUMS aka how we arrived from parent
+        self.enum = 0 
         self.gdistance = 0
         self.hdistance = self.heuristic()
-
+        
+        
     def child_states(self):
-        puzzles = []
         
         #find neighbors of 0 and store in order: UP DOWN LEFT RIGHT
         neighbors = []
@@ -33,17 +35,17 @@ class Puzzle:
         if j_zero-1 in range(3): #right
             neighbors.append([i_zero,j_zero-1, 3])
         
-
+        puzzles = []
         #swap neighbors with 0 to produce new child states
         for neighbor in neighbors:
-            print(neighbor)
-            #parent = self
             child_state = Puzzle(self.swap(neighbor[0], neighbor[1]))
-            print(child_state.puzzle)
             child_state.enum = neighbor[2]
-            print(child_state.enum)
-            #child_state.parent = parent
-            puzzles.append(child_state)
+            child_state.parent = self
+            child_state.gdistance = self.gdistance + 1
+            if(self.parent == None):
+                puzzles.append(child_state)
+            elif(child_state.puzzle != self.parent.puzzle):
+                puzzles.append(child_state)
                 
         return puzzles     
 
@@ -56,132 +58,181 @@ class Puzzle:
 
     #swaps 0 with a selected index
     def swap(self, index1, index2):
-        
-        child = self.puzzle 
+        child = copy.deepcopy(self.puzzle)
         i,j = self.find_zero()
         child[i][j], child[index1][index2] = child[index1][index2], child[i][j]
         return child
 
-    def getDistance(self):
+    def TotalDistance(self):
         return self.gdistance + self.hdistance
+    
+    def __gt__(self, other):
+        if (self.TotalDistance() == other.TotalDistance()):
+            return self.enum > other.enum
+        else:
+            return self.TotalDistance() > other.TotalDistance()
 
+    def __lt__(self, other):
+        if (self.TotalDistance() == other.TotalDistance()):
+            return self.enum < other.enum
+        else:
+            return self.TotalDistance() < other.TotalDistance()
+
+    
+    #
+    # A-Star with the heuristic: # of misplaced tiles 
+    #  
     def heuristic(self):
         distance = 0
-
+        temp = copy.deepcopy(self.puzzle)
+        temp = np.array(temp)
+        temp = temp.flatten()
+        arr = list(temp)
+        enum = enumerate(arr)
+        for index, tile in enum:
+            if tile != goal_flat[index]:
+                distance = distance+1
         return distance
 
-def BFS(puzzle):
-    """
-    Breadth-First Search.
+    """""
+    #
+    # A-Star with the heuristic: Sum of Manhattan Distance of each tile from correct position
+    #
+    def heuristic(self):
+        distance = 0
+        temp = copy.deepcopy(self.puzzle)
+        temp = np.array(temp)
+        temp = temp.flatten()
+        arr = list(temp)
+        enum = enumerate(arr)
+        for index, tile in enum:
+            if tile != goal_flat[index]:
+                distance = distance + Manhattan_distance(index,goal_flat.index(tile))
+        return distance
 
-    Arguments:
-    - puzzle: Node object representing initial state of the puzzle
+    """""
+def Manhattan_distance(i, j):
+    distance = 0
+    X1= i // 3
+    Y1= i % 3
+    X2= j // 3
+    Y2= j % 3
+    return abs(X2 - X1) + abs(Y2 - Y1)
 
-    Return:
-    final_solution: An ordered list of moves representing the final solution.
-    """
+
+def toInt(array):
+    for i in range(len(array)):
+        for j in range(len(array)):
+            array[i][j] = int(array[i][j])
+    return array
+
+    
+
+def BFS(board):
     final_solution = []
-
-    puzzle=Puzzle(puzzle)
-
+    puzzle=Puzzle(toInt(board))
     visited = []
     queue = [puzzle]
     while queue:
         state = queue.pop(0)
+
         if state.puzzle == goal:
+            visited.append(state)
             break
         if state not in visited:
             visited.append(state)
             for child in state.child_states():
                 queue.append(child)
 
-
-
     for node in visited:
-        
         final_solution.append(node.enum)
     
+    del final_solution[0]
     return final_solution
 
 
-def DFS(puzzle):
-    """
-    Depth-First Search.
-
-    Arguments:
-    - puzzle: Node object representing initial state of the puzzle
-
-    Return:
-    final_solution: An ordered list of moves representing the final solution.
-    """
+def DFS(board):
+    
     final_solution = []
 
-    puzzle=Puzzle(puzzle)
+    puzzle=Puzzle(toInt(board))
 
-    visited = set()
+    visited = []
     stack = [puzzle]
     while stack:
         state = stack.pop()
+        
         if state.puzzle == goal:
-            #######
+            visited.append(state)
             break
         if state not in visited:
-            visited.add(state)
-            for child in state.child_states():
-                stack.append(child)
+            No_of_children = len(state.child_states())
+            children = state.child_states()
+            visited.append(state)
+            for i in range(No_of_children):
+                stack.append(children[No_of_children - i - 1])
         
 
-    # TODO: WRITE CODE
+    for node in visited:
+        final_solution.append(node.enum)
 
+    del final_solution[0]
     return final_solution
 
 
-def A_Star_H1(puzzle):
-    """
-    A-Star with Heuristic 1
+def A_Star_H1(board):
 
-    Arguments:
-    - puzzle: Node object representing initial state of the puzzle
-
-    Return:
-    final_solution: An ordered list of moves representing the final solution.
-    """
-
-    puzzle=Puzzle(puzzle)
-
-
-
-
-
+    puzzle=Puzzle(toInt(board))
 
     final_solution = []
+    visited = []
+    queue = []
 
-    # TODO: WRITE CODE
+    
+    heapq.heappush(queue, puzzle)
+    while queue:
+        state = heapq.heappop(queue)
+        
+        if state.puzzle == goal:
+            visited.append(state)
+            break 
+        if state not in visited:
+            visited.append(state)
+            for child in state.child_states():
+                heapq.heappush(queue, child)
 
+    for node in visited:
+        final_solution.append(node.enum)
+
+    del final_solution[0]
     return final_solution
 
 
-def A_Star_H2(puzzle):
-    """
-    A-Star with Heauristic 2
+def A_Star_H2(board):
 
-    Arguments:
-    - puzzle: Node object representing initial state of the puzzle
-
-    Return:
-    final_solution: An ordered list of moves representing the final solution.
-    """
-
-    puzzle=Puzzle(puzzle)
-
-
-
-
+    puzzle=Puzzle(toInt(board))
 
     final_solution = []
+    visited = []
+    queue = []
 
-    # TODO: WRITE CODE
+    
+    heapq.heappush(queue, puzzle)
+    while queue:
+        state = heapq.heappop(queue)
+        
+        if state.puzzle == goal:
+            visited.append(state)
+            break 
+        if state not in visited:
+            visited.append(state)
+            for child in state.child_states():
+                heapq.heappush(queue, child)
 
+    for node in visited:
+        final_solution.append(node.enum)
+
+    del final_solution[0]
     return final_solution
 
 
@@ -189,30 +240,18 @@ def A_Star_H2(puzzle):
 
 
 
+"""""
+print("BFS")
+print(BFS(puzzle))
+print(get_move_string(BFS(puzzle)))
 
-
-def read_puzzle(filename):
-        """
-        Helper to read a puzzle from a file.
-
-        Arguments:
-            filename: Name of file to read from.
-        """
-        puzzle = []
-        with open(filename, "r") as f:
-            for line in f.readlines():
-                puzzle.append(line.split(' '))
-        return puzzle
-
-#board = read_puzzle('test_data/ex1.txt')
-board=[[1, 2, 3], [0, 5, 6], [4, 7, 8]]
-print(board)
-
-final_solution = []
-
-puzzle=Puzzle(board)
-
-children = puzzle.child_states()
-
-for child in children:
-    print(child.puzzle)
+print("\nDFS")
+print(DFS(puzzle))
+print(get_move_string(DFS(puzzle)))
+print("\nA_Star_H1")
+print(A_Star_H1(puzzle))
+print(get_move_string(A_Star_H1(puzzle)))
+print("\nA_Star_H2")
+print(A_Star_H2(puzzle))
+print(get_move_string(A_Star_H2(puzzle)))
+"""""
