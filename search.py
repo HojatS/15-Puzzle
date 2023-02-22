@@ -133,14 +133,14 @@ def BFS(board):
     puzzle=Puzzle(toInt(board))
     visited = []
     queue = [puzzle]
+
     while queue:
         state = queue.pop(0)
-
         if state.puzzle == goal:
-            visited.append(state)
+            visited.append(state.puzzle)
             break
-        if state not in visited:
-            visited.append(state)
+        if state.puzzle not in visited:
+            visited.append(state.puzzle)
             for child in state.child_states():
                 queue.append(child)
     
@@ -157,21 +157,23 @@ def BFS(board):
 def DFS(board):
     
     final_solution = []
-
     puzzle=Puzzle(toInt(board))
-
     visited = []
     stack = [puzzle]
-    while stack:
+    depth=0
+
+
+    while stack and depth<100:
         state = stack.pop()
         
         if state.puzzle == goal:
-            visited.append(state)
+            visited.append(state.puzzle)
             break
-        if state not in visited:
+        if state.puzzle not in visited:
+            depth+=1
             No_of_children = len(state.child_states())
             children = state.child_states()
-            visited.append(state)
+            visited.append(state.puzzle)
             for i in range(No_of_children):
                 stack.append(children[No_of_children - i - 1])
         
@@ -200,10 +202,10 @@ def A_Star_H1(board):
     while queue:
         state = heapq.heappop(queue)
         if state.puzzle == goal:
-            visited.append(state)
+            visited.append(state.puzzle)
             break 
-        if state not in visited:
-            visited.append(state)
+        if state.puzzle not in visited:
+            visited.append(state.puzzle)
             for child in state.child_states():
                 heapq.heappush(queue, child)
 
@@ -230,10 +232,10 @@ def A_Star_H2(board):
     while queue:
         state = heapq.heappop(queue)
         if state.puzzle == goal:
-            visited.append(state)
+            visited.append(state.puzzle)
             break 
-        if state not in visited:
-            visited.append(state)
+        if state.puzzle not in visited:
+            visited.append(state.puzzle)
             for child in state.child_states():
                 heapq.heappush(queue, child)
 
